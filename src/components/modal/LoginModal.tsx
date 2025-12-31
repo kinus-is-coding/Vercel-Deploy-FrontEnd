@@ -18,8 +18,7 @@ const LoginModal = () => {
     const [errors, setErrors] = useState<string[]>([]); // Array for error messages
     const [isLoading, setIsLoading] = useState(false);
 
-    const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-    const LOGIN_API_URL = `${API_BASE_URL}/api/token/`; // Proxy route to Django JWT endpoint
+    const LOGIN_API_URL = '/api/token/';
 
     // --- Core Login Submission Logic ---
     const handleSubmit = async (e: React.FormEvent) => {

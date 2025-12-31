@@ -17,10 +17,9 @@ const SignupModal = () => {
     const [errors, setErrors] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Get the base URL for the internal Next.js API route
-    const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    
     // This calls the proxy route we will create: /api/register
-    const SIGNUP_API_URL = `${API_BASE_URL}/api/register/`; 
+    const SIGNUP_API_URL = '/api/register/'; 
 
     // --- Core Registration Logic ---
     const submitSignup = async (e: React.FormEvent) => {
