@@ -59,9 +59,10 @@ async function generateQuizWithAI(features: Feature[], objectType?: string) {
 
   const payload = { features, objectType };
 
-  const response = await openai.responses.create({
-    model: "gpt-4.1-mini",
-    input: [
+  // 1. Sửa openai.responses.create thành openai.chat.completions.create
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o-mini", // Dùng gpt-4o-mini cho rẻ và nhanh (gpt-4.1-mini không tồn tại)
+    messages: [
       {
         role: "system",
         content: QUIZ_GENERATION_PROMPT,
@@ -71,11 +72,18 @@ async function generateQuizWithAI(features: Feature[], objectType?: string) {
         content: JSON.stringify(payload),
       },
     ],
+    response_format: { type: "json_object" } // Ép AI trả về JSON chuẩn
   });
 
-  const text = response.output[0].content[0].text;
-  const parsed = JSON.parse(text) as { questions: QuizQuestion[] };
+  // 2. Truy cập nội dung an toàn hơn
+  const text = response.choices[0].message.content;
 
+  if (!text) {
+    throw new Error("AI trả về nội dung trống");
+  }
+
+  // 3. Parse và trả về
+  const parsed = JSON.parse(text) as { questions: QuizQuestion[] };
   return parsed.questions;
 }
 
