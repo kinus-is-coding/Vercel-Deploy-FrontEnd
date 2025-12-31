@@ -25,13 +25,8 @@ const Feedlist: React.FC<FeedlistProps> = ({ isLoggedIn }) => {
     // 5. Define the data fetching function
     const fetchPosts = async () => {
         // Define the INTERNAL Next.js API route URL
-        const API_URL = '/api/posts/'; 
         
-        // Use environment variables for the Next.js server base URL (e.g., http://localhost:3000)
-        // Note: For client-side fetch, you generally need to ensure the base URL is public.
-        const baseUrl = 'http://localhost:3000';
-        
-        const fullUrl = `${baseUrl}${API_URL}`; 
+        const fullUrl = '/api/posts/'; 
 
         try {
             const response = await fetch(fullUrl);
