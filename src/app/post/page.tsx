@@ -40,7 +40,7 @@ export default function Home() {
     const [error, setError] = useState<string | null>(null);
 
     const searchParams = useSearchParams();
-    const lockerId = searchParams.get('locker');
+    const lockerId = searchParams?.get('locker');
     
 
     const manualFeatures = useMemo(() => {
