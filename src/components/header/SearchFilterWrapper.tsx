@@ -3,26 +3,27 @@
 
 import { usePathname } from "next/navigation";
 import SearchFilter from "./SearchFilter";
-
+import { useRouter } from "next/navigation";
 export default function SearchFilterWrapper() {
   const pathname = usePathname() || "";
-
-  // DANH SÁCH CÁC TRANG CHO PHÉP HIỆN FILTER (Bro thêm bớt ở đây)
-  const allowedPaths = [
-    "/",          // Trang chủ
-    "/items",     // Trang danh sách món đồ
-    "/feed"       // Trang feed
-  ];
-
-  // Kiểm tra xem pathname hiện tại có nằm trong danh sách không
+  const router = useRouter();
+  const allowedPaths = ["/", "/items", "/feed"];
   const shouldShow = allowedPaths.includes(pathname);
-  
 
   if (!shouldShow) return null;
 
+  const handleSearch = (keyword: string) => {
+    // Đẩy từ khóa lên URL để trang con nhận được
+    if (keyword.trim()) {
+      router.push(`/?q=${encodeURIComponent(keyword)}`);
+    } else {
+      router.push("/");
+    }
+  };
+
   return (
-    <div className="flex-1 max-w-md mx-4 transition-all duration-300">
-       <SearchFilter />
+    <div className="w-full">
+       <SearchFilter onSearch={handleSearch} />
     </div>
   );
 }

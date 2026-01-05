@@ -4,7 +4,6 @@ import type { FC, FormEvent } from "react";
 import { useState } from "react";
 
 export type QuizChoice = { id: string; text: string };
-
 export type QuizQuestion = {
   id: string;
   text: string;
@@ -32,7 +31,7 @@ const Quiz: FC<QuizProps> = ({ questions, onResult }) => {
     const correctAnswers: Record<string, string> = {};
 
     for (const q of questions) {
-      if (answers[q.id] && answers[q.id] === q.correctChoiceId) {
+      if (answers[q.id] === q.correctChoiceId) {
         score += 1;
       }
       correctAnswers[q.id] = q.correctChoiceId;
@@ -42,41 +41,71 @@ const Quiz: FC<QuizProps> = ({ questions, onResult }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {questions.map((q) => (
-        <fieldset
-          key={q.id}
-          className="space-y-2 rounded-lg border border-slate-700 bg-slate-900/70 p-4"
-        >
-          <legend className="text-sm font-medium text-slate-100">
-            {q.text}
-          </legend>
-          <div className="space-y-1 text-sm text-slate-200">
-            {q.choices.map((choice) => (
-              <label key={choice.id} className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name={q.id}
-                  value={choice.id}
-                  checked={answers[q.id] === choice.id}
-                  onChange={(e) =>
-                    setAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))
-                  }
-                  className="h-3 w-3 rounded border-slate-500 text-sky-500 focus:ring-sky-500"
-                  required
-                />
-                <span>{choice.text}</span>
-              </label>
-            ))}
+    <form onSubmit={handleSubmit} className="space-y-8 max-w-2xl mx-auto pb-10">
+      <div className="space-y-6">
+        {questions.map((q, index) => (
+          <div
+            key={q.id}
+            className="rounded-xl border border-slate-800 bg-slate-900/50 p-5 md:p-6 shadow-xl"
+          >
+            <div className="flex items-start gap-3 mb-4">
+              <span className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 text-xs flex items-center justify-center font-bold">
+                {index + 1}
+              </span>
+              <h3 className="text-base md:text-lg font-semibold text-slate-100">
+                {q.text}
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3">
+              {q.choices.map((choice) => {
+                const isSelected = answers[q.id] === choice.id;
+                return (
+                  <label
+                    key={choice.id}
+                    className={`
+                      relative flex items-center p-4 rounded-lg border-2 cursor-pointer transition-all active:scale-[0.98]
+                      ${isSelected 
+                        ? "border-indigo-500 bg-indigo-500/10 text-white" 
+                        : "border-slate-800 bg-slate-800/30 text-slate-400 hover:border-slate-700"}
+                    `}
+                  >
+                    <input
+                      type="radio"
+                      name={q.id}
+                      value={choice.id}
+                      checked={isSelected}
+                      onChange={(e) =>
+                        setAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))
+                      }
+                      className="sr-only" // Ẩn cái radio tròn xấu xí mặc định đi
+                      required
+                    />
+                    <div className="flex items-center gap-3 w-full">
+                      <div className={`
+                        w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0
+                        ${isSelected ? "border-indigo-500" : "border-slate-600"}
+                      `}>
+                        {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-indigo-500" />}
+                      </div>
+                      <span className="text-sm md:text-base font-medium">{choice.text}</span>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
           </div>
-        </fieldset>
-      ))}
-      <button
-        type="submit"
-        className="inline-flex items-center justify-center rounded-md bg-emerald-500 px-4 py-2 text-sm font-medium text-emerald-950 hover:bg-emerald-400"
-      >
-        Submit answers
-      </button>
+        ))}
+      </div>
+
+      <div className="flex justify-center pt-4">
+        <button
+          type="submit"
+          className="w-full md:w-auto min-w-[200px] inline-flex items-center justify-center rounded-full bg-emerald-500 px-8 py-4 text-sm md:text-base font-bold text-emerald-950 hover:bg-emerald-400 transition-all hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] active:scale-95"
+        >
+          Xác nhận câu trả lời
+        </button>
+      </div>
     </form>
   );
 };
