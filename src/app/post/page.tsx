@@ -38,6 +38,7 @@ function PostContent() {
         setError(null);
         setIsCreatingQuiz(true);
         try {
+            
             const res = await fetch(`/api/create-quiz?locker=${lockerId || ''}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -70,7 +71,7 @@ function PostContent() {
                     Check if a lost item is really yours
                 </h2>
                 <p className="text-sm text-slate-400">
-                    Upload a photo or describe your item. We&apos;ll extract
+                    Describe your item. We&apos;ll extract
                     identifying features and turn them into a short quiz that only the
                     real owner is likely to pass.
                 </p>
@@ -84,9 +85,7 @@ function PostContent() {
 
             <section className="grid gap-8 md:grid-cols-1">
                 <div className="space-y-4">
-                    <h3 className="text-sm font-medium text-slate-200 uppercase tracking-wide">
-                        Option B · Manual input
-                    </h3>
+                    
 
                     <div className="space-y-3 rounded-lg border border-slate-700 bg-slate-900/60 p-4 text-sm">
                         <div className="space-y-1">
@@ -122,7 +121,7 @@ function PostContent() {
                     </div>
 
                     <div className="space-y-2 text-sm">
-                        <h4 className="font-medium text-slate-200">Manual feature preview</h4>
+                        <h4 className="font-medium text-slate-200">Features preview</h4>
                         <FeatureList
                             features={manualFeatures}
                             onChange={setFeatures}
@@ -134,7 +133,7 @@ function PostContent() {
                     <button
                         type="button"
                         onClick={handleCreateQuizFromManual}
-                        disabled={manualFeatures.length === 0 || isCreatingQuiz}
+                        disabled={manualFeatures.length < 3 || isCreatingQuiz}
                         className="w-full inline-flex items-center justify-center rounded-md bg-indigo-500 px-4 py-2 text-sm font-medium text-indigo-950 hover:bg-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isCreatingQuiz ? "Creating quiz…" : "Create Quiz from Manual Input"}

@@ -3,14 +3,14 @@ import "./globals.css";
 import Layout from "../components/Layout";
 
 export const metadata: Metadata = {
-  title: "Lost Item Identifier",
+  title: "Technolock",
   description:
     "Verify if a lost item is really yours using AI-powered quizzes.",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: Readonly<{ 
   children: React.ReactNode;
 }>) {
   return (

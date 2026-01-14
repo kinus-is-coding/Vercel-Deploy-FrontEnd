@@ -18,11 +18,11 @@ You will be given:
 - an optional objectType
 
 Rules:
-- Each question MUST be based directly on one or more provided features.
+- Each question MUST be based directly on one provided features.
 - Do NOT invent new details that are not explicitly present in the features list.
 - Prefer generating one question per feature when possible.
 - If multiple features describe the same aspect, you may combine them into one question.
-- Generate between 3 and 6 multiple-choice questions.
+- Generate between 4 and 6 multiple-choice questions.
 - Each question must focus on details that a real owner would remember.
 - Each question must have between 4 and 5 choices.
 - Provide plausible but incorrect alternatives for wrong choices.

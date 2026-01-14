@@ -11,8 +11,10 @@ export default function QuizPage() {
   const postId = params?.quizId; 
 
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
+  const [lockerId, setLockerId] = useState<string>("");
   const [status, setStatus] = useState<"loading" | "loaded" | "error">("loading");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(false);
   const [modalData, setModalData] = useState({ title: "", message: "", type: "success" });
 
   useEffect(() => {
@@ -31,6 +33,11 @@ export default function QuizPage() {
         }));
 
         setQuizQuestions(mappedQuestions);
+        if (typeof data.locker === 'object' && data.locker !== null) {
+          setLockerId(String(data.locker.locker || "N/A"));
+        } else {
+          setLockerId(String(data.locker || "N/A"));
+        }
         setStatus("loaded");
       } catch (err) {
         console.error(err);
@@ -42,22 +49,16 @@ export default function QuizPage() {
 
   const handleResult = async ({ score, total }: QuizResult) => {
     if (score === total) {
+      setIsCorrect(true);
       setModalData({
         title: "Xác minh thành công! ✔",
-        message: "Chính xác 100%! Bạn đã xác minh đúng chủ sở hữu. Tủ đồ đang được mở.",
+        message: "Chính xác 100%! Bạn đã xác minh đúng chủ sở hữu",
         type: "success"
       });
 
-      try {
-        const res = await fetch(`/api/posts/${postId}/complete/`, { 
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        if (res.ok) console.log("Đã Deactive bài đăng!");
-      } catch (err) {
-        console.error("Lỗi kết nối API:", err);
-      }
+     
     } else {
+      setIsCorrect(false);
       setModalData({
         title: "Xác minh thất bại ❌",
         message: `Bạn trả lời đúng ${score}/${total}. Thông tin chưa khớp, vui lòng thử lại sau.`,
@@ -66,6 +67,25 @@ export default function QuizPage() {
     }
     setIsModalOpen(true);
   };
+  const handleFinalUnlock = async () => {
+  try {
+ 
+    const res = await fetch(`/api/posts/${postId}/complete/`, { 
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (res.ok) {
+      alert("Tủ đồ đang mở! Hãy lấy đồ và đóng cửa tủ lại.");
+      setIsModalOpen(false);
+      router.push('/');
+    } else {
+      alert("Có lỗi xảy ra khi kết nối với tủ đồ.");
+    }
+  } catch (err) {
+    console.error("Lỗi xác nhận:", err);
+  }
+};
 
   if (status === "loading") {
     return (
@@ -101,41 +121,70 @@ export default function QuizPage() {
       <Quiz questions={quizQuestions} onResult={handleResult} />
 
       <Modals
-        isOpen={isModalOpen}
-        label={modalData.title}
-        close={() => {
-          setIsModalOpen(false);
-          if (modalData.type === 'success') router.push('/');
-        }}
-        content={(
-          <div className="flex flex-col items-center text-center space-y-6 py-4">
-            <div className={`text-6xl animate-bounce`}>
-              {modalData.type === 'success' ? "🔓" : "🔒"}
-            </div>
-            
-            <div className="space-y-2">
-              <h2 className={`text-xl font-bold ${modalData.type === 'success' ? 'text-emerald-600' : 'text-red-600'}`}>
-                {modalData.title}
-              </h2>
-              <p className="text-slate-600 font-medium px-4">
-                {modalData.message}
-              </p>
-            </div>
+  isOpen={isModalOpen}
+  label={modalData.title}
+  close={() => {
+    setIsModalOpen(false);
+    router.push('/');
 
-            <button 
-              onClick={() => {
-                setIsModalOpen(false);
-                router.push('/');
-              }}
-              className={`w-full py-4 rounded-2xl font-bold text-white shadow-lg transition-all active:scale-95 ${
-                modalData.type === 'success' ? 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-200' : 'bg-slate-800 hover:bg-slate-900 shadow-slate-200'
-              }`}
-            >
-              Về Trang Chủ
-            </button>
+  }}
+  content={(
+    <div className="flex flex-col items-center text-center space-y-6 py-2">
+      {/* Icon trạng thái */}
+      
+      
+      <div className="space-y-1">
+        
+        <p className="text-slate-400 text-sm px-4">
+          {modalData.message}
+        </p>
+      </div>
+      <div className="text-6xl">
+        {modalData.type === 'success' ? "🚀" : "🔒"}
+      </div>
+
+      {/* CHỈ HIỆN LOCKER ID KHI ĐÚNG */}
+      {isCorrect && (
+        <div className="group relative">
+          <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-cyan-500 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
+          <div className="relative flex flex-col items-center bg-slate-900 border border-slate-800 px-10 py-6 rounded-2xl">
+            <span className="text-[10px] text-slate-500 uppercase tracking-[0.3em] mb-1">Mã số ngăn tủ</span>
+            <span className="text-5xl font-black text-white tracking-tighter shadow-indigo-500">
+              {lockerId}
+            </span>
           </div>
+        </div>
+      )}
+
+      <div className="flex flex-col w-full gap-3 px-2 pt-4">
+        {isCorrect ? (
+          <>
+            <button 
+              onClick={handleFinalUnlock}
+              className="w-full py-4 rounded-2xl font-bold text-white bg-indigo-600 hover:bg-indigo-500 shadow-[0_0_15px_rgba(79,70,229,0.3)] transition-all active:scale-95 flex items-center justify-center gap-2"
+            >
+              MỞ TỦ NGAY
+
+            </button>
+            <button 
+              onClick={() => { setIsModalOpen(false); router.push('/'); }}
+              className="py-2 text-slate-500 text-xs hover:text-slate-300 transition-colors uppercase tracking-widest"
+            >
+              Về trang chủ
+            </button>
+          </>
+        ) : (
+          <button 
+            onClick={() => { setIsModalOpen(false); router.push('/'); }}
+            className="w-full py-4 rounded-2xl font-bold text-white bg-slate-800 hover:bg-slate-700 transition-all"
+          >
+            QUAY LẠI
+          </button>
         )}
-      />
+      </div>
+    </div>
+  )}
+/>
     </div>
   );
 }

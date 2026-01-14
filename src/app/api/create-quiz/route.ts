@@ -52,12 +52,13 @@ const openai = new OpenAI({
   baseURL: "https://api.groq.com/openai/v1", 
 });
 
-async function generateQuizWithAI(features: Feature[], objectType?: string) {
+async function generateQuizWithAI(features: Feature[]) {
   if (!process.env.GROQ_API_KEY) {
     throw new Error("OPENAI_API_KEY is not set");
   }
-
-  const payload = { features, objectType };
+  const userContent = `
+    DANH SÁCH ĐẶC ĐIỂM CẦN DÙNG:
+    ${features.map((f, i) => `- ${f}`).join("\n")}`;
 
   // 1. Sửa openai.responses.create thành openai.chat.completions.create
   const response = await openai.chat.completions.create({
@@ -69,7 +70,7 @@ async function generateQuizWithAI(features: Feature[], objectType?: string) {
       },
       {
         role: "user",
-        content: JSON.stringify(payload),
+        content: userContent,
       },
     ],
     response_format: { type: "json_object" } // Ép AI trả về JSON chuẩn
@@ -122,7 +123,10 @@ export async function POST(request: NextRequest) {
       { status: 400 },
     );
   }
-
+  const strictlyFeatures = body.features
+    .filter(f => f.startsWith('Description:'))
+    .map(f => f.replace('Description: ', '')); 
+  
 
   const useMock =process.env.USE_MOCK_AI === "true" || !process.env.GROQ_API_KEY;
 
@@ -130,13 +134,13 @@ export async function POST(request: NextRequest) {
 
   try {
     questions = useMock
-      ? buildMockQuestions(body.features)
-      : await generateQuizWithAI(body.features, body.objectType);
+      ? buildMockQuestions(strictlyFeatures)
+      : await generateQuizWithAI(strictlyFeatures);
 
     validateQuiz(questions); 
   } catch (err) {
     console.error("Quiz generation failed → fallback mock", err);
-    questions = buildMockQuestions(body.features);
+    questions = buildMockQuestions(strictlyFeatures);
   }
 
   const DJANGO_API_BASE_URL = process.env.DJANGO_API_BASE_URL;
