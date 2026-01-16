@@ -8,7 +8,7 @@ import Link from "next/link";
 
 export default function Layout({ children }: PropsWithChildren) {
   return (
-    <div className="relative min-h-screen flex flex-col overflow-x-hidden text-slate-50">
+    <div className="relative min-h-screen flex flex-col overflow-x-hidden text-slate-50 bg-[#0f172a]">
       
       {/* 🌊 WAVY BACKGROUND */}
       <div className="absolute inset-0 -z-10">
@@ -21,7 +21,7 @@ export default function Layout({ children }: PropsWithChildren) {
         className="
           sticky top-0 z-50
           border-b border-white/5
-          bg-slate-900/70
+        bg-[#0f172a]  
           backdrop-blur-xl
           supports-[backdrop-filter]:bg-slate-900/60
         "
@@ -79,7 +79,7 @@ export default function Layout({ children }: PropsWithChildren) {
             mx-auto
             max-w-full md:max-w-10xl lg:max-w-full
             rounded-2xl
-            bg-slate-900/60
+           bg-[#0f172a]
             border border-white/5
             shadow-xl shadow-indigo-500/10
             p-6 md:p-8
@@ -95,7 +95,7 @@ export default function Layout({ children }: PropsWithChildren) {
       </main>
 
       {/* FOOTER */}
-      <footer className="border-t border-white/5 bg-slate-900/70 py-10 px-4">
+      <footer className="border-t border-white/5 bg-[#0f172a] py-10 px-4">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-400 uppercase tracking-widest">
           <p>© {new Date().getFullYear()} Eureka</p>
           <div className="flex gap-6">

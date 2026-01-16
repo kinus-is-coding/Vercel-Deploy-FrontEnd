@@ -45,6 +45,7 @@ export default function ResultNotificationModal() {
 
           <div className="flex flex-col w-full gap-3 px-2 pt-4">
             {type === 'success' ? (
+              <div className="flex flex-col w-full gap-3 ">
               <button 
                 onClick={async () => { 
                   if(onAction) await onAction(); // Gọi hàm PATCH để mở tủ thật
@@ -55,6 +56,13 @@ export default function ResultNotificationModal() {
               >
                 MỞ TỦ NGAY
               </button>
+              <button 
+                onClick={handleCloseAndRedirect} // Bấm nút này cũng về trang chủ
+                className="w-full py-4 rounded-2xl font-bold text-white bg-slate-800 hover:bg-slate-700 transition-all"
+              >
+                QUAY LẠI TRANG CHỦ
+              </button>
+              </div>
             ) : (
               <button 
                 onClick={handleCloseAndRedirect} // Bấm nút này cũng về trang chủ

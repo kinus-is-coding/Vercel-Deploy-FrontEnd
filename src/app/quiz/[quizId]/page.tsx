@@ -34,7 +34,7 @@ export default function QuizPage() {
 
         setQuizQuestions(mappedQuestions);
         if (typeof data.locker === 'object' && data.locker !== null) {
-          setLockerId(String(data.locker.locker || "N/A"));
+          setLockerId(String(data.locker.locker_id || "N/A"));
         } else {
           setLockerId(String(data.locker || "N/A"));
         }
