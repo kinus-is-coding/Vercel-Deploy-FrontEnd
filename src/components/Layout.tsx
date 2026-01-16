@@ -1,6 +1,7 @@
 import React, { PropsWithChildren } from "react";
 import LoginModal from "./modal/LoginModal";
 import SignupModal from "./modal/SignupModal";
+import NotificationModal from "./modal/AnswerModal";
 import AuthButtons from "./header/AuthButton";
 import SearchFilterWrapper from "./header/SearchFilterWrapper";
 import Link from "next/link";
@@ -90,6 +91,7 @@ export default function Layout({ children }: PropsWithChildren) {
 
         <LoginModal />
         <SignupModal />
+        <NotificationModal/>
       </main>
 
       {/* FOOTER */}

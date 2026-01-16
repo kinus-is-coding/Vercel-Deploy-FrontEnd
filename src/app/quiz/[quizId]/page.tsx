@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Quiz, { type QuizQuestion, type QuizResult } from "@/components/Quiz"; 
-import Modals from "@/components/modal/Modals";
-
+import { useNotificationStore } from "@/hooks/useResultModal";
 export default function QuizPage() {
+  const openNotification = useNotificationStore((state) => state.openNotification);
   const params = useParams();
   const router = useRouter();
   const postId = params?.quizId; 
@@ -48,25 +48,52 @@ export default function QuizPage() {
   }, [postId]);
 
   const handleResult = async ({ score, total }: QuizResult) => {
-    if (score === total) {
-      setIsCorrect(true);
-      setModalData({
-        title: "Xác minh thành công! ✔",
-        message: "Chính xác 100%! Bạn đã xác minh đúng chủ sở hữu",
-        type: "success"
+  // 1. Trường hợp trả lời SAI
+    if (score !== total) {
+      setIsCorrect(false);
+      openNotification({
+        type: 'error',
+        title: "Xác minh thất bại ❌",
+        message: `Bạn trả lời đúng ${score}/${total}. Vui lòng thử lại.`
+      }); 
+      return; // Dừng luôn không chạy tiếp
+    }
+
+    // 2. Trường hợp trả lời ĐÚNG -> Gọi API addlocker ngay lập tức
+    try {
+      const res = await fetch('/api/addlock/', { 
+        method: 'POST',
+       
+        body: JSON.stringify({ post_id: postId })
       });
 
-     
-    } else {
+      if (res.ok) {
+        // API Backend đã add_locker thành công
+        setIsCorrect(true);
+        openNotification({
+          type: 'success',
+          title: "Xác minh thành công! ✔",
+          message: "Chìa khóa ảo đã được cấp cho bạn.",
+          lockerId: lockerId,
+          onAction: handleFinalUnlock // Hàm này sẽ được gọi khi bấm nút trong Modal
+        });
+      } else {
+        const errorData = await res.json();
+        throw new Error(errorData.details || "Không thể cấp quyền truy cập tủ.");
+      }
+    } catch (err: any) {
+      console.error("Lỗi addlock:", err);
       setIsCorrect(false);
-      setModalData({
-        title: "Xác minh thất bại ❌",
-        message: `Bạn trả lời đúng ${score}/${total}. Thông tin chưa khớp, vui lòng thử lại sau.`,
+      openNotification({
+        title: "Lỗi hệ thống ⚠️",
+        message: err.message || "Có lỗi khi nhận chìa khóa, vui lòng thử lại.",
         type: "error"
       });
+    } finally {
+      // Cuối cùng mới mở Modal để thông báo kết quả
+      setIsModalOpen(true);
     }
-    setIsModalOpen(true);
-  };
+};
   const handleFinalUnlock = async () => {
   try {
  
@@ -78,7 +105,6 @@ export default function QuizPage() {
     if (res.ok) {
       alert("Tủ đồ đang mở! Hãy lấy đồ và đóng cửa tủ lại.");
       setIsModalOpen(false);
-      router.push('/');
     } else {
       alert("Có lỗi xảy ra khi kết nối với tủ đồ.");
     }
@@ -120,71 +146,7 @@ export default function QuizPage() {
 
       <Quiz questions={quizQuestions} onResult={handleResult} />
 
-      <Modals
-  isOpen={isModalOpen}
-  label={modalData.title}
-  close={() => {
-    setIsModalOpen(false);
-    router.push('/');
-
-  }}
-  content={(
-    <div className="flex flex-col items-center text-center space-y-6 py-2">
-      {/* Icon trạng thái */}
       
-      
-      <div className="space-y-1">
-        
-        <p className="text-slate-400 text-sm px-4">
-          {modalData.message}
-        </p>
-      </div>
-      <div className="text-6xl">
-        {modalData.type === 'success' ? "🚀" : "🔒"}
-      </div>
-
-      {/* CHỈ HIỆN LOCKER ID KHI ĐÚNG */}
-      {isCorrect && (
-        <div className="group relative">
-          <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-cyan-500 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-          <div className="relative flex flex-col items-center bg-slate-900 border border-slate-800 px-10 py-6 rounded-2xl">
-            <span className="text-[10px] text-slate-500 uppercase tracking-[0.3em] mb-1">Mã số ngăn tủ</span>
-            <span className="text-5xl font-black text-white tracking-tighter shadow-indigo-500">
-              {lockerId}
-            </span>
-          </div>
-        </div>
-      )}
-
-      <div className="flex flex-col w-full gap-3 px-2 pt-4">
-        {isCorrect ? (
-          <>
-            <button 
-              onClick={handleFinalUnlock}
-              className="w-full py-4 rounded-2xl font-bold text-white bg-indigo-600 hover:bg-indigo-500 shadow-[0_0_15px_rgba(79,70,229,0.3)] transition-all active:scale-95 flex items-center justify-center gap-2"
-            >
-              MỞ TỦ NGAY
-
-            </button>
-            <button 
-              onClick={() => { setIsModalOpen(false); router.push('/'); }}
-              className="py-2 text-slate-500 text-xs hover:text-slate-300 transition-colors uppercase tracking-widest"
-            >
-              Về trang chủ
-            </button>
-          </>
-        ) : (
-          <button 
-            onClick={() => { setIsModalOpen(false); router.push('/'); }}
-            className="w-full py-4 rounded-2xl font-bold text-white bg-slate-800 hover:bg-slate-700 transition-all"
-          >
-            QUAY LẠI
-          </button>
-        )}
-      </div>
-    </div>
-  )}
-/>
     </div>
   );
 }
