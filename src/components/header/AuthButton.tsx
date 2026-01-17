@@ -11,19 +11,30 @@ const AuthButtons = async () => {
     const { isLoggedIn } = await getAuthStatus();
 
     if (isLoggedIn) {
-        // --- LOGGED IN: Show Logout Button ---
+        // --- LOGGED IN: Show Account and Logout Button ---
         return (
-            <form action={handleLogout}>
-                <button 
-                    type="submit" 
+            <div className="flex items-center space-x-4">
+                <Link 
+                    href="/account"
                     className="
-                        py-2 px-4 bg-red-600 text-white font-bold rounded-xl 
-                        hover:bg-red-700 transition duration-150
+                        py-2 px-4 bg-blue-600 text-white font-bold rounded-xl 
+                        hover:bg-blue-700 transition duration-150
                     "
                 >
-                    Logout
-                </button>
-            </form>
+                    Account
+                </Link>
+                <form action={handleLogout}>
+                    <button 
+                        type="submit" 
+                        className="
+                            py-2 px-4 bg-red-600 text-white font-bold rounded-xl 
+                            hover:bg-red-700 transition duration-150
+                        "
+                    >
+                        Logout
+                    </button>
+                </form>
+            </div>
         );
     } 
     
