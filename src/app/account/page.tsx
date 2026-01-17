@@ -35,6 +35,7 @@ const AccountPage = async () => {
     });
     if (res.ok) {
       lockers = await res.json();
+      console.log(lockers)
     }
   } catch (error) {
     console.error("Error fetching lockers:", error);
