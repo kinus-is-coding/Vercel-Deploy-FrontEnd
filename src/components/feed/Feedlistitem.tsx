@@ -77,7 +77,7 @@ const Feedlistitem: React.FC<FeedlistitemProps> = ({ post, isLoggedIn }) => {
                 <p className='text-lg font-bold group-hover:text-indigo-400 transition'>{post.title}</p>
             </div>
             <div className='mt-2'>
-                <p className='text-sm text-gray-500'>
+                <p className='text-sm text-white'>
                     <strong>{post.location}</strong> · {formatDate(post.created_at)}
                 </p>
             </div>
