@@ -2,14 +2,12 @@
 
 import { useEffect, useMemo, useState, Suspense } from "react";
 import FeatureList from "@/components/FeatureList";
-import { useRouter, useParams, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type Feature = string;
 
-// 1. Tạo component chứa toàn bộ logic xử lý
 function PostContent() {
     const router = useRouter();
-
     const [features, setFeatures] = useState<Feature[]>([]);
     const [manualItem, setManualItem] = useState("");
     const [manualLocation, setManualLocation] = useState("");
@@ -17,7 +15,6 @@ function PostContent() {
     const [isCreatingQuiz, setIsCreatingQuiz] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // useSearchParams() gây lỗi build nếu không có Suspense bọc ngoài
     const searchParams = useSearchParams();
     const lockerId = searchParams?.get('locker');
 
@@ -31,14 +28,13 @@ function PostContent() {
     }, [manualItem, manualLocation, manualDescription]);
 
     async function handleCreateQuizFromManual() {
-        if (manualFeatures.length === 0) {
-            setError("Please enter at least one identifying feature.");
+        if (manualFeatures.length < 3) {
+            setError("Vui lòng điền đủ 3 thông tin để tạo quiz.");
             return;
         }
         setError(null);
         setIsCreatingQuiz(true);
         try {
-            
             const res = await fetch(`/api/create-quiz?locker=${lockerId || ''}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -60,83 +56,95 @@ function PostContent() {
             router.push('/');
         } catch (err) {
             console.error(err);
-            setError("Could not create quiz. Please try again.");
+            setError("Lỗi kết nối. Vui lòng thử lại.");
+            setIsCreatingQuiz(false);
         }
     }
 
     return (
-        <div className="space-y-8">
-            <section className="space-y-2">
-                <h2 className="text-2xl font-semibold tracking-tight">
+        <div className="space-y-6 md:space-y-8 animate-fade-in">
+            {/* Header Section */}
+            <section className="space-y-3 px-1">
+                <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
                     Check if a lost item is really yours
                 </h2>
-                <p className="text-sm text-slate-400">
+                <p className="text-sm md:text-base text-slate-400 leading-relaxed">
                     Describe your item. We&apos;ll extract
-                    identifying features and turn them into a short quiz that only the
-                    real owner is likely to pass.
+                    identifying features and turn them into a short quiz.
                 </p>
             </section>
 
             {error && (
-                <div className="rounded-md border border-red-500/60 bg-red-950/40 px-3 py-2 text-sm text-red-200">
-                    {error}
+                <div className="rounded-xl border border-red-500/50 bg-red-950/20 px-4 py-3 text-sm text-red-200 animate-shake">
+                    ⚠️ {error}
                 </div>
             )}
 
-            <section className="grid gap-8 md:grid-cols-1">
-                <div className="space-y-4">
-                    
-
-                    <div className="space-y-3 rounded-lg border border-slate-700 bg-slate-900/60 p-4 text-sm">
-                        <div className="space-y-1">
-                            <label className="block text-xs font-medium text-slate-300">Item</label>
+            <section className="grid gap-6">
+                <div className="space-y-6">
+                    {/* Form Container - Dùng màu nền đặc để không bị bạc màu trên mobile */}
+                    <div className="space-y-5 rounded-2xl border border-white/10 bg-[#0f172a] p-5 md:p-6 shadow-xl">
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold uppercase tracking-wider text-indigo-400 ml-1">Item Name</label>
                             <input
                                 value={manualItem}
                                 onChange={(e) => setManualItem(e.target.value)}
                                 placeholder="e.g. Notebooks thienlong"
-                                className="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none"
+                                className="w-full rounded-xl border border-white/5 bg-[#070b14] px-4 py-4 text-base text-slate-50 placeholder:text-slate-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-all"
                             />
                         </div>
 
-                        <div className="space-y-1">
-                            <label className="block text-xs font-medium text-slate-300">Location</label>
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold uppercase tracking-wider text-indigo-400 ml-1">Location Found</label>
                             <input
                                 value={manualLocation}
                                 onChange={(e) => setManualLocation(e.target.value)}
-                                placeholder="e.g. scratch on right lens, initials inside strap"
-                                className="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none"
+                                placeholder="e.g. Near the library entrance"
+                                className="w-full rounded-xl border border-white/5 bg-[#070b14] px-4 py-4 text-base text-slate-50 placeholder:text-slate-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none transition-all"
                             />
                         </div>
 
-                        <div className="space-y-1">
-                            <label className="block text-xs font-medium text-slate-300">Short description ( Use for verification )</label>
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold uppercase tracking-wider text-indigo-400 ml-1">Verification Details</label>
                             <textarea
                                 value={manualDescription}
                                 onChange={(e) => setManualDescription(e.target.value)}
-                                placeholder="e.g. small black backpack with a broken right strap"
-                                rows={3}
-                                className="w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none resize-none"
+                                placeholder="Describe details only the owner knows..."
+                                rows={4}
+                                className="w-full rounded-xl border border-white/5 bg-[#070b14] px-4 py-4 text-base text-slate-50 placeholder:text-slate-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none resize-none transition-all"
                             />
                         </div>
                     </div>
 
-                    <div className="space-y-2 text-sm">
-                        <h4 className="font-medium text-slate-200">Features preview</h4>
-                        <FeatureList
-                            features={manualFeatures}
-                            onChange={setFeatures}
-                            readOnly
-                            placeholder="No manual features yet. Fill in the form above."
-                        />
+                    {/* Preview Area */}
+                    <div className="space-y-3 px-1">
+                        <h4 className="text-sm font-semibold text-slate-300 flex items-center gap-2">
+                            <span className="h-1.5 w-1.5 rounded-full bg-indigo-500"></span>
+                            Features preview
+                        </h4>
+                        <div className="rounded-2xl bg-slate-900/40 p-1">
+                            <FeatureList
+                                features={manualFeatures}
+                                onChange={setFeatures}
+                                readOnly
+                                placeholder="No manual features yet. Fill in the form above."
+                            />
+                        </div>
                     </div>
 
+                    {/* Submit Button - To, rõ, dễ bấm trên mobile */}
                     <button
                         type="button"
                         onClick={handleCreateQuizFromManual}
                         disabled={manualFeatures.length < 3 || isCreatingQuiz}
-                        className="w-full inline-flex items-center justify-center rounded-md bg-indigo-500 px-4 py-2 text-sm font-medium text-indigo-950 hover:bg-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full flex items-center justify-center rounded-2xl bg-indigo-600 py-5 text-base font-bold text-white hover:bg-indigo-500 shadow-lg shadow-indigo-600/20 transition-all active:scale-[0.98] disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed"
                     >
-                        {isCreatingQuiz ? "Creating quiz…" : "Create Quiz from Manual Input"}
+                        {isCreatingQuiz ? (
+                             <div className="flex items-center gap-2">
+                                <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                                Creating quiz...
+                             </div>
+                        ) : "Create Quiz Now"}
                     </button>
                 </div>
             </section>
@@ -144,10 +152,9 @@ function PostContent() {
     );
 }
 
-// 2. Export chính bọc trong Suspense để Next.js cho phép Build
 export default function PostPage() {
     return (
-        <Suspense fallback={<div className="p-8 text-center text-slate-400">Loading post...</div>}>
+        <Suspense fallback={<div className="p-20 text-center text-slate-500 font-medium">Loading interface...</div>}>
             <PostContent />
         </Suspense>
     );
